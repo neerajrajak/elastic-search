@@ -1,0 +1,108 @@
+Elastic search
+
+- Elastic search open source till 7.0, post 7.1 it is paid for its premium feature.
+- AWS forked version 7.0 and created its own elastic search which they named as “Open Search”
+- OpenSearch and Elasticsearch are both powerful search and analytics engines, but OpenSearch is a fork of Elasticsearch 7.10.2, created by Amazon after Elastic changed Elasticsearch's licensing model, offering an open-source alternative with a focus on community-driven development and free advanced security features, while Elasticsearch has a more mature ecosystem and advanced features, some of which require paid licenses. 
+
+
+What happens when we start Elastic search
+- Nodes store the data that we add to Elastic search
+- A cluster is a collection of nodes
+- Data is stored as documents, which are JSON objects
+- Documents are grouped together within index.
+
+Inpecting a cluster
+- Run command in Kibana dev tools - GET /_cluster/health
+
+GET /_cluster/health
+
+GET /_cat/nodes?v
+
+GET /_cat/indices?v&expand_wildcards=all
+
+
+Introduction to Sharding
+- Sharding is a way to divide indices into smaller pieces
+- Each piece is referred to as a Shard
+- Sharding is done at index level, since each index consist of many documents, so those documents are stored in multiple shards
+- The main purpose is to horizontally scale the data volume
+- Example : We have two nodes each of 500GB and indices is of 600gb which will not be stored in one node. So we can create a two shard of 300gb and each shard can be stored on each node, in this way each node will be having few memory left to store other shards.
+
+The purpose of Sharding
+- Mainly to be able to store more documents 
+- To easier fit large indices into nodes
+- Improved performance: Parallelisation of queries increase the throughput of an index.
+
+Configuring the number of shards
+- An index contains a single shard by default
+- For elastic search below 7 version five shards were created for each indices, which let to over sharding issue.
+- Increase the number of shards with Split API
+- Decrease the number of shards with Shrink API
+
+
+
+Introduction to Replication
+- What happens if a node hard drive fails
+- Hardware can fail any time, so we need to handle it
+- Elastic search supports replication for fault tolerance
+- Replication is supported natively and enabled by default
+- With many db, setting up replication is tedious which comes by default in elastic search
+
+
+How does replication work?
+- Replication is configured at index level
+- Replication works by creating a copy of shards, referred to as replica shards
+- A shard that has been replicated is a primary shard
+- A primary shard and its replica shards are referred to as replication group
+- Replica shards is exact copy of shards
+- We can specify how many replica of a shards can be created
+- Replica shard is never shared on the same shard with primary shard thus helping fault tolerance in case of failure.
+
+
+Snapshots
+- Elastic search supports taking snapshots as backups
+- Snapshots can be used to restore to a given point in time
+- Snapshots can be taken at an index level, or for entire cluster 
+- Use Snapshots for backups and replication for high availability
+
+
+Increasing throughput with replication
+- Replica shards of a replication group can serve different search request simultaneously 
+- This increase the number of requests that can be handled at the same time
+- Elastic search intelligently routes request to best shard
+- CPU paralleliztaion improves performance if multiple replica shards are stored on same node.
+
+
+Overview of node roles ===>
+
+- Master-eligible role
+- Master eligible is responsible for creating and deleting indices
+- A node with this role will automatically become the master node
+- Useful for large cluster
+
+- Data role
+- Enables a node to store data
+- Storing data including performing queries related to that data
+- For small clusters this role is always enabled
+- Useful for having dedicated master nodes
+- Used as part of configuring dedicated master node
+
+- Ingest roles
+- Enables a node to run ingest pipelines
+- Ingest: series of steps performed when indexing documents
+- A simplified version of logstasg, directly within elastic search
+
+For machine learning: 
+- node.ml settings
+- xpack.ml.enableed
+- usefull for running ML jobs
+
+Coordination node
+- refers to distribution of queries and the aggregation results
+- useful for coordination only for large clusters
+-  configured by disabling all the nodes
+
+
+
+
+
