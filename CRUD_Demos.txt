@@ -1,0 +1,77 @@
+
+To find health of cluster i.e about cluster is it up or running: GET /_cluster/health
+Sample Output:
+{
+  "cluster_name": "es-cluster",
+  "status": "green",
+  "timed_out": false,
+  "number_of_nodes": 3,
+  "number_of_data_nodes": 3,
+  "active_primary_shards": 11,
+  "active_shards": 22,
+  "relocating_shards": 0,
+  "initializing_shards": 0,
+  "unassigned_shards": 0,
+  "delayed_unassigned_shards": 0,
+  "number_of_pending_tasks": 0,
+  "number_of_in_flight_fetch": 0,
+  "task_max_waiting_in_queue_millis": 0,
+  "active_shards_percent_as_number": 100
+}
+
+To get nodes information: GET /_nodes/stats
+
+----------------------------------------------------------------------------------------
+Below is an exercise I followed to perform crud operation in elastic search via kibana
+----------------------------------------------------------------------------------------
+
+PUT favourite_candy
+
+POST favourite_candy/_doc
+{
+  "first_name": "Neeraj",
+  "candy": "KitKat candy"
+}
+
+PUT favourite_candy/_doc/1
+{
+  "first_name": "John",
+  "candy": "Starburst"
+}
+
+PUT favourite_candy/_doc/2
+{
+  "first_name": "Preeti",
+  "candy": "Jalebi"
+}
+
+PUT favourite_candy/_doc/3
+{
+  "first_name": "Nidhi",
+  "candy": "Cadbury"
+}
+
+PUT favourite_candy/_doc/3
+{
+  "first_name": "Nidhi",
+  "candy": "Perk"
+}
+
+POST favourite_candy/_update/3
+{
+  "doc": {
+    "candy": "Silk"
+  }
+}
+
+PUT favorite_candy/_create/1
+{
+  "first_name": "Finn",
+  "candy": "Jolly Ranchers"
+}
+
+DELETE favourite_candy/_doc/1
+
+GET /favourite_candy/_search
+
+GET favourite_candy/_doc/1
