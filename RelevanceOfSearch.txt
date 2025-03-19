@@ -1,0 +1,31 @@
+
+Relevant Documents in an index are categrorized as :
+  - true positives
+  - false positives
+  - true negatives
+  - false negatives
+
+
+What is Precision?
+  What portion of the retrieved data is actually relevant to the search query?
+
+  Precision  = True positives / true positives + false positives
+
+What is Recall?
+  What portion of relevant data is being returned as search results
+
+  Precision  = True positives / true positives + false negatives
+
+- Precision and Recall is inversely related
+- In precision, all the retrieved results to be a perfect match to the query, even if it means returning less documents
+- Recall, retrieve more results even if documents may not be a perfect match to the query
+
+Ranking - referes to ordering of the results (from most relevant at the top to least relevant at the bottom)
+
+What is a Score?
+  - The score is a value that represents how relevant a document is to that specific query
+  - A score os computed for each document that is a hit
+
+**Term frequency determines how many times each search term appear in a dcoument
+
+**Inverse Document Frequency diminishes the weight of terms that occur very frequently in the document set and increases the weight of terms that occur rarely!
