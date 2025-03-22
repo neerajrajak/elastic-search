@@ -1,0 +1,235 @@
+GET news_headlines/_search
+{
+  "query": {
+    "match": {
+      "headline": {
+        "query": "Shape of You"
+      }
+    }
+  }
+}
+
+If you see the result of above query there are greater than 10k hits.
+This is because it is using an OR clause and returning values containing any one or two words amongst three in any order
+Here the precision is lower than recall
+
+
+GET news_headlines/_search
+{
+  "query": {
+    "match_phrase": {
+      "headline": {
+        "query": "Shape of You"
+      }
+    }
+  }
+}
+
+Using match phrase we have got only 3 hits.
+This is because, here precision is higher since it is returning only those documents whose headlines contains all three words in the same order.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Running a match query against multiple fields
+
+To increase the recall and get more documents we can go with multi_match query
+
+GET news_headlines/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "Michelle Obama",
+      "fields": [
+        "headline",
+        "short_description",
+        "authors"
+      ]
+    }
+  }
+}
+
+in our search for "Michelle Obama" related headlines, the top hit is a news headline featuring Bernie Sanders as the main topic. 
+In this headline, Michelle Obama is mentioned once in the field short_description.
+Which makes the data irrelevant to headline since it is giving document hire score whose headline is not matching with short description.
+
+To give higher weightage to headline we can use power of (^2) in the headline as below
+
+GET news_headlines/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "Michelle Obama",
+      "fields": [
+        "headline^2",
+        "short_description",
+        "authors"
+      ]
+    }
+  }
+
+using power of 2 in headline we are returning the same count of hits as before, the only difference is it is giving higher weightage to headlines
+followed by other two fields.
+
+Little drawback of using multi_match
+With the multi_match query, a document is considered as a hit if any one of these search terms were found in any one of the specified fields. 
+It does not take into account the order or the proximity in which these search terms are found.
+Because of that, you will see loosely related search results included among the top hits.
+
+You can improve the precision of a multi_match query by adding the "type":"phrase" to the query.
+
+GET news_headlines/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "party planning",
+      "fields": [
+        "headline^2",
+        "short_description"
+      ],
+      "type": "phrase"
+    }
+  }
+}
+
+Now we got only 6 hits, since it is matching both the words either in headline or short_Description giving headline the higher weightage
+and returning only those documents which has both the words in same order.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Combined Queries
+There will be times when a user asks a multi-faceted question that requires multiple queries to answer.
+
+For example, a user may want to find political headlines about Michelle Obama published before the year 2016.
+
+This search is actually a combination of three queries:
+
+Query headlines that contain the search terms "Michelle Obama" in the field headline.
+Query "Michelle Obama" headlines from the "POLITICS" category.
+Query "Michelle Obama" headlines published before the year 2016
+One of the ways you can combine these queries is through a bool query.
+
+Bool Query
+
+Syntax:
+
+GET name_of_index/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {One or more queries can be specified here. A document MUST match all of these queries to be considered as a hit.}      // return everything matching it
+      ],
+      "must_not": [
+        {A document must NOT match any of the queries specified here. It it does, it is excluded from the search results.}      // returning everything except query mentioned in not match
+      ],
+      "should": [
+        {A document does not have to match any queries specified here. However, it if it does match, this document is given a higher score.}    //change ranking of documents it is used with other combination
+      ],
+      "filter": [
+        {These filters(queries) place documents in either yes or no category. Ones that fall into the yes category are included in the hits. }    // 
+      ]
+    }
+  }
+}
+
+must clause =>
+
+GET news_headlines/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+        "match_phrase": {
+          "headline": "Michelle Obama"
+         }
+        },
+        {
+          "match": {
+            "category": "POLITICS"
+          }
+        }
+      ]
+    }
+  }
+}
+
+above query returns all results whose criteria matches politics and headline having Michelle Obama
+
+must_not =>
+
+GET news_headlines/_search
+{
+  "query": {
+    "bool": {
+      "must": {
+        "match_phrase": {
+          "headline": "Michelle Obama"
+         }
+        },
+       "must_not":[
+         {
+          "match": {
+            "category": "WEDDINGS"
+          }
+        }
+      ]
+    }
+
+Using must not, we are returning results matching headline and also from all other categories except WEDDINGS
+
+should => 
+
+GET news_headlines/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+        "match_phrase": {
+          "headline": "Michelle Obama"
+          }
+         }
+        ],
+       "should":[
+         {
+          "match_phrase": {
+            "category": "BLACK VOICES"
+          }
+        }
+      ]
+    }
+  }
+}
+  }
+}
+
+We are returning results matching headlines with category equals BLACK VOICES given higher ranking than others
+
+
+filter =>
+
+GET news_headlines/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+        "match_phrase": {
+          "headline": "Michelle Obama"
+          }
+         }
+        ],
+       "filter":{
+          "range":{
+             "date": {
+               "gte": "2014-03-25",
+               "lte": "2016-03-25"
+          }
+        }
+      }
+    }
+  }
+}
+
+We are returning all results matching with headline given which falls within two date range
