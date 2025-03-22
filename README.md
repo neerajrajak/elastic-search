@@ -20,6 +20,8 @@ Part4: Aggregation
 https://www.youtube.com/watch?v=iGKOdep1Iss&list=PL_mJOmq4zsHZYAyK606y7wjQtC0aoE6Es&index=4
 https://github.com/LisaHJung/Part-4-Running-Aggregations-with-Elasticsearch-and-Kibana
 
+Part5. Mapping
+https://www.youtube.com/watch?v=FQAHDrVwfok&list=PL_mJOmq4zsHZYAyK606y7wjQtC0aoE6Es&index=6
 https://github.com/LisaHJung/Part-5-Understanding-Mapping-with-Elasticsearch-and-Kibana
 
 github.com/LisaHJung/Part-6-Troubleshooting-Beginner-Level-Elasticsearch-Errors
