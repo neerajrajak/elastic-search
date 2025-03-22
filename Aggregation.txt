@@ -1,0 +1,492 @@
+
+Aggregation Request
+
+Syntax:
+
+{
+  "aggs": {
+    "Name your aggregations here": {
+      "Specify the aggregation type here": {
+        "field": "Name the field you want to aggregate on here"
+      }
+    }
+  }
+}
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+Metric Aggregation
+
+ It can be used to calculate the values of sum,min, max, avg, unique count(cardinality) and etc.
+
+Example: Sum of all unit prices
+
+GET ecommerce_data/_search
+{
+  "aggs": {
+    "sum_unit_price": {
+      "sum": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+By default, Elasticsearch returns top 10 hits.
+If we don't want to return only top 10 hits result for aggregation.
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "sum_unit_price": {
+      "sum": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+By adding size 0 hit will return an empty array in hits
+
+Compute the lowest(min) unit price of an item =>
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "lowest_unit_price": {
+      "min": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+Compute the highest(max) unit price of an item => 
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "highest_unit_price": {
+      "max": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+Compute the average unit price of items} => 
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "average_unit_price": {
+      "avg": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+The stats aggregation will yield the values of count(the number of unit prices aggregation was performed on), min, max, avg, and sum(sum of all unit prices in the index).
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "all_stats_unit_price": {
+      "stats": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+Cardinality Aggregation
+The cardinality aggregation computes the count of unique values for a given field.
+
+Syntax:
+
+GET Enter_name_of_the_index_here
+{
+  "size": 0,
+  "aggs": {
+    "Name your aggregations here": {
+      "cardinality": {
+        "field": "Name the field you want to aggregate on here"
+      }
+    }
+  }
+}
+
+
+Example: total unique customers
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "number_unique_customers": {
+      "cardinality": {
+        "field": "CustomerID"
+      }
+    }
+  }
+}
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+Limiting the scope of an aggregation
+
+To limit the scope of the aggregation, you can add a query clause to the aggregations request. The query clause defines the subset of documents that aggregations should be performed on.
+
+Syntax:
+
+GET Enter_name_of_the_index_here/_search
+{
+  "size": 0,
+  "query": {
+    "Enter match or match_phrase here": {
+      "Enter the name of the field": "Enter the value you are looking for"
+    }
+  },
+  "aggregations": {
+    "Name your aggregations here": {
+      "Specify aggregations type here": {
+        "field": "Name the field you want to aggregate here"
+      }
+    }
+  }
+}
+
+Example: The average of unit price of items sold in Germany
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "query": {
+    "match": {
+      "Country": "Germany"
+    }
+  },
+  "aggs": {
+    "germany_average_unit_price": {
+      "avg": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+Above we are using a combination of query and aggregation to kind of find the average unit price in Germany only
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+Bucket Aggregation
+
+When you want to aggregate on several subsets of documents, bucket aggregations will come in handy. 
+Bucket aggregations group documents into several sets of documents called buckets. 
+All documents in a bucket share a common criteria.
+
+The following are different types of bucket aggregations:
+Date Histogram Aggregation
+Histogram Aggregation
+Range Aggregation
+Terms aggregation
+
+
+1. Date Histogram Aggregation
+When you are looking to group data by time interval, the date_histogram aggregation will prove very useful!
+There are two ways to define a time interval:
+Fixed Interval
+Calendar Interval
+
+Fixed_interval With the fixed_interval, the interval is always constant.
+
+Example: Create a bucket for every 8 hour interval.
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "transactions_by_8_hrs": {
+      "date_histogram": {
+        "field": "InvoiceDate",
+        "fixed_interval": "8h"
+      }
+    }
+  }
+}
+
+
+Calendar_interval With the calendar_interval, the interval may vary.
+For example, we could choose a time interval of day, month or year. 
+But daylight savings can change the length of specific days, months can have different number of days, and leap seconds can be tacked onto a particular year.
+
+Example: Elasticsearch creates monthly buckets.
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "transactions_by_month": {
+      "date_histogram": {
+        "field": "InvoiceDate",
+        "calendar_interval": "1M"
+      }
+    }
+  }
+}
+
+
+By default the date_histogram will return result in ascending order of key field.
+If we want to change the default sorting use below query.
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "transactions_by_month": {
+      "date_histogram": {
+        "field": "InvoiceDate",
+        "calendar_interval": "1M",
+        "order": {
+          "_key": "desc"
+        }
+      }
+    }
+  }
+}
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+Histogram Aggregation
+The histogram aggregation creates buckets based on any numerical interval.
+
+Example: Create a buckets based on price interval that increases in increments of 10. (buckets of 0-10, 10-20, 20-30 and so on for unit price)
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "transactions_per_price_interval": {
+      "histogram": {
+        "field": "UnitPrice",
+        "interval": 10
+      }
+    }
+  }
+}
+
+For Sorting:
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "transactions_per_price_interval": {
+      "histogram": {
+        "field": "UnitPrice",
+        "interval": 10,
+        "order": {
+          "_key": "desc"
+        }
+      }
+    }
+  }
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+Range Aggregation
+Similar to histogram, range aggregation helps to return results based on multiple ranges
+For example, what if you wanted to know the number of transactions for items from varying price ranges(between 0 and $50, between $50-$200, and between $200 and up)?
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "transactions_per_custom_price_ranges": {
+      "range": {
+        "field": "UnitPrice",
+        "ranges": [
+          {
+            "to": 50
+          },
+          {
+            "from": 50,
+            "to": 200
+          },
+          {
+            "from": 200
+          }
+        ]
+      }
+    }
+  }
+}
+
+We cannot sort range aggregation.
+The range aggregation is sorted based on the input ranges you specify and it cannot be sorted any other way!
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+Terms Aggregation
+The terms aggregation creates a new bucket for every unique term it encounters for the specified field. It is often used to find the most frequently found terms in a document.
+
+For example, let's say you want to identify 5 customers with the highest number of transactions(documents).
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "top_5_customers": {
+      "terms": {
+        "field": "CustomerID",
+        "size": 5
+      }
+    }
+  }
+}
+
+Here we are using customerID because through customer id we can specify those top customers with total transaction having top 5 results
+Elasticsearch will return 5 customer IDs("key") with the highest number of transactions("doc_count").
+
+By default, the terms aggregation sorts buckets based on the "doc_count" values in descending order. To reverse this order, you can add an order parameter to the aggregation
+
+Example:
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "5_customers_with_lowest_number_of_transactions": {
+      "terms": {
+        "field": "CustomerID",
+        "size": 5,
+        "order": {
+          "_count": "asc"
+        }
+      }
+    }
+  }
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+Combined Aggregations:
+Combining multiple aggregation in a single query
+
+Example:  let's say we wanted to know the sum of revenue per day.
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "transactions_per_day": {
+      "date_histogram": {
+        "field": "InvoiceDate",
+        "calendar_interval": "day"
+      },
+      "aggs": {
+        "daily_revenue": {
+          "sum": {
+            "script": {
+              "source": "doc['UnitPrice'].value * doc['Quantity'].value"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+In above example, we are creating a bucket of each day with its daily revenue. The script will execute for each transaction i.e. unitptice * quantity and
+then return a sum of it for that particular day in the daily_revenue field.
+
+To calculate multiple metrics per bucket for example along with daily revenue find number of unique customers done transaction per day.
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "transactions_per_day": {
+      "date_histogram": {
+        "field": "InvoiceDate",
+        "calendar_interval": "day"
+      },
+      "aggs": {
+        "daily_revenue": {
+          "sum": {
+            "script": {
+              "source": "doc['UnitPrice'].value * doc['Quantity'].value"
+            }
+          }
+        },
+        "number_of_unique_customers_per_day": {
+          "cardinality": {
+            "field": "CustomerID"
+          }
+        }
+      }
+    }
+  }
+}
+
+Sorting:
+By default it is sorted in ascending order of day.
+we can also sort by metric value of sub-aggregations like sorting by daily_revenue field as below
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "transactions_per_day": {
+      "date_histogram": {
+        "field": "InvoiceDate",
+        "calendar_interval": "day",
+        "order": {
+          "daily_revenue": "desc"
+        }
+      },
+      "aggs": {
+        "daily_revenue": {
+          "sum": {
+            "script": {
+              "source": "doc['UnitPrice'].value * doc['Quantity'].value"
+            }
+          }
+        },
+        "number_of_unique_customers_per_day": {
+          "cardinality": {
+            "field": "CustomerID"
+          }
+        }
+      }
+    }
+  }
+}
+
+You will see that the response is no longer sorted by date. The buckets are now sorted to return the highest daily revenue first!
+
+
+
+
+
+
+
+
+
+
+
+
+
