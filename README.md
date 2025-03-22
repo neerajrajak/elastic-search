@@ -16,6 +16,8 @@ Part 3: Full Text Search
 https://github.com/LisaHJung/Part-3-Running-full-text-queries-and-combined-queries-with-Elasticsearch-and-Kibana
 https://www.youtube.com/watch?v=2KgJ6TQPIIA&list=PL_mJOmq4zsHZYAyK606y7wjQtC0aoE6Es&index=3
 
+Part4: 
+https://www.youtube.com/watch?v=iGKOdep1Iss&list=PL_mJOmq4zsHZYAyK606y7wjQtC0aoE6Es&index=4
 https://github.com/LisaHJung/Part-4-Running-Aggregations-with-Elasticsearch-and-Kibana
 
 https://github.com/LisaHJung/Part-5-Understanding-Mapping-with-Elasticsearch-and-Kibana
